@@ -1,30 +1,11 @@
-// types/document.types.ts
-
-export interface SolrResponse {
-  response: {
-    numFound: number;        // total de documentos encontrados
-    start: number;           // início da paginação
-    maxScore: number;
-    numFoundExact: boolean;
-    docs: Document[];
-  };
-  responseHeader: {
-    status: number;
-    QTime: number;
-    params: {
-      q: string;             // query de busca
-      start: string;         // paginação
-      fq: string;            // filtros aplicados
-      wt: string;            // formato (xml)
-    };
-  };
-}
+// src/types/document.types.ts
 
 export interface Document {
+  // IDs
   id: string;
   id_l: number;
   
-  // Identificação
+  // Identificação do Processo
   processo_s: string;
   tipo_processo_s: string;
   subtipo_processo_s: string;
@@ -55,7 +36,7 @@ export interface Document {
   equipe_origem_s: string;
   nome_equipe_atual_s: string;
   
-  // ACT (Atividade)
+  // ACT
   codigo_act_s: string;
   origem_act_s: string;
   tema_act_s: string;
@@ -82,10 +63,45 @@ export interface Document {
   // Conteúdo OCR
   conteudo_txt: string;
   
+  // Responsável
+  nome_usuario_juntada_doc_s: string;
+  
   // Metadados Solr
   _version_: number;
   score: number;
-  
-  // Responsável
-  nome_usuario_juntada_doc_s: string;
+}
+
+export interface SolrResponseHeader {
+  status: number;
+  QTime: number;
+  params: {
+    q: string;
+    start: string;
+    fq?: string | string[];
+    wt: string;
+    rows?: string;
+    facet?: string;
+    'facet.field'?: string | string[];
+    'facet.limit'?: string;
+    'facet.mincount'?: string;
+    fl?: string;
+  };
+}
+
+export interface SolrFacetCounts {
+  facet_fields: {
+    [key: string]: Array<string | number>;
+  };
+}
+
+export interface SolrResponse {
+  responseHeader: SolrResponseHeader;
+  response: {
+    numFound: number;
+    start: number;
+    maxScore: number;
+    numFoundExact: boolean;
+    docs: Document[];
+  };
+  facet_counts?: SolrFacetCounts;
 }

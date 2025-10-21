@@ -1,4 +1,4 @@
-// types/filter.types.ts
+// src/types/filter.types.ts
 
 export type FilterType = 
   | 'text' 
@@ -16,14 +16,6 @@ export interface FilterOption {
   helperText?: string;
 }
 
-export interface AppliedFilter {
-  id: string;
-  label: string;
-  field: string;
-  value: string | string[] | { from: string; to: string };
-  displayValue?: string; // para exibir no chip
-}
-
 export interface DateRangeValue {
   from: string;
   to: string;
@@ -32,4 +24,12 @@ export interface DateRangeValue {
 export interface NumberRangeValue {
   from: number;
   to: number;
+}
+
+export interface AppliedFilter {
+  id: string;
+  label: string;
+  field: string;
+  value: string | string[] | DateRangeValue | NumberRangeValue;
+  displayValue?: string;
 }

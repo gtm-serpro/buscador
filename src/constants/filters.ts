@@ -1,6 +1,6 @@
-// constants/filters.ts
+// src/constants/filters.ts
 
-import { FilterOption } from '@/types/filter.types';
+import type { FilterOption } from '@/types/filter.types';
 
 export const AVAILABLE_FILTERS: FilterOption[] = [
   // ============ DATAS ============
@@ -206,53 +206,3 @@ export const FILTERS_MAP = AVAILABLE_FILTERS.reduce((acc, filter) => {
   acc[filter.id] = filter;
   return acc;
 }, {} as Record<string, FilterOption>);
-
-// Agrupa filtros por categoria para organizar na UI
-export const FILTER_GROUPS = {
-  datas: {
-    label: 'Datas',
-    filters: AVAILABLE_FILTERS.filter(f => f.type === 'date-range')
-  },
-  processo: {
-    label: 'Processo',
-    filters: AVAILABLE_FILTERS.filter(f => 
-      ['tipo_processo', 'subtipo_processo', 'grupo_processo', 'situacao_processo', 'nr_processo', 'valor_processo'].includes(f.id)
-    )
-  },
-  documento: {
-    label: 'Documento',
-    filters: AVAILABLE_FILTERS.filter(f => 
-      ['tipo_documento', 'titulo_documento', 'nr_doc_principal'].includes(f.id)
-    )
-  },
-  unidades: {
-    label: 'Unidades e Equipes',
-    filters: AVAILABLE_FILTERS.filter(f => 
-      ['unidade_origem', 'unidade_atual', 'equipe_origem', 'equipe_atual'].includes(f.id)
-    )
-  },
-  contribuinte: {
-    label: 'Contribuinte',
-    filters: AVAILABLE_FILTERS.filter(f => 
-      ['nome_contribuinte', 'ni_contribuinte', 'cpf_responsavel'].includes(f.id)
-    )
-  },
-  tributario: {
-    label: 'Tributário',
-    filters: AVAILABLE_FILTERS.filter(f => 
-      ['tributo_act', 'assuntos_objetos'].includes(f.id)
-    )
-  },
-  julgamento: {
-    label: 'Julgamento',
-    filters: AVAILABLE_FILTERS.filter(f => 
-      ['result_julgamento_drj_1', 'result_julgamento_drj_2', 'alegacoes_recurso', 'nome_relator_drj'].includes(f.id)
-    )
-  },
-  outros: {
-    label: 'Outros',
-    filters: AVAILABLE_FILTERS.filter(f => 
-      ['nome_usuario_juntada'].includes(f.id)
-    )
-  }
-};
