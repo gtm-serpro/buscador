@@ -3,7 +3,9 @@
 import type { AppliedFilter, DateRangeValue, NumberRangeValue } from '@/types/filter.types';
 import type { Document, SolrResponse } from '@/types/document.types';
 import { FILTERS_MAP } from '@/constants/filters';
+import { MOCK_DOCUMENTS, MOCK_FACETS } from './mockData';
 
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'; // Controla se usa mock ou não
 const SOLR_BASE_URL = import.meta.env.VITE_SOLR_URL || 'http://localhost:8983/solr';
 const SOLR_CORE = import.meta.env.VITE_SOLR_CORE || 'eprocesso';
 
@@ -45,7 +47,50 @@ function buildFilterQuery(filters: AppliedFilter[]): string[] {
 }
 
 /**
- * Busca documentos no Solr
+ * Filtra documentos mockados baseado na query e filtros
+ */
+function filterMockDocuments(
+  query: string,
+  filters: AppliedFilter[]
+): Document[] {
+  let filtered = [...MOCK_DOCUMENTS];
+  
+  // Filtra por query
+  if (query && query !== '*:*') {
+    const lowerQuery = query.toLowerCase();
+    filtered = filtered.filter(doc => 
+      doc.titulo_s?.toLowerCase().includes(lowerQuery) ||
+      doc.conteudo_txt?.toLowerCase().includes(lowerQuery) ||
+      doc.nome_contribuinte_s?.toLowerCase().includes(lowerQuery) ||
+      doc.processo_s?.toLowerCase().includes(lowerQuery)
+    );
+  }
+  
+  // Aplica filtros
+  filters.forEach(filter => {
+    const filterDef = FILTERS_MAP[filter.id];
+    if (!filterDef) return;
+    
+    filtered = filtered.filter(doc => {
+      const docValue = doc[filterDef.field as keyof Document];
+      
+      if (Array.isArray(filter.value)) {
+        return filter.value.includes(docValue as string);
+      }
+      
+      if (typeof filter.value === 'string') {
+        return docValue?.toString().toLowerCase().includes(filter.value.toLowerCase());
+      }
+      
+      return true;
+    });
+  });
+  
+  return filtered;
+}
+
+/**
+ * Busca documentos no Solr (ou mock)
  */
 export async function searchDocuments(
   query: string,
@@ -57,6 +102,23 @@ export async function searchDocuments(
   total: number;
   facets: Record<string, Array<string | number>>;
 }> {
+  // Simula delay de rede
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  if (USE_MOCK) {
+    // Usa dados mockados
+    const filtered = filterMockDocuments(query, filters);
+    const start = (page - 1) * pageSize;
+    const paged = filtered.slice(start, start + pageSize);
+    
+    return {
+      documents: paged,
+      total: filtered.length,
+      facets: MOCK_FACETS
+    };
+  }
+  
+  // Usa Solr real
   const start = (page - 1) * pageSize;
   const fq = buildFilterQuery(filters);
   
@@ -65,19 +127,15 @@ export async function searchDocuments(
     start: start.toString(),
     rows: pageSize.toString(),
     wt: 'json',
-    // Facetas para sidebar
     'facet': 'true',
     'facet.limit': '50',
     'facet.mincount': '1',
-    // Campos retornados
     'fl': 'id,processo_s,tipo_processo_s,subtipo_processo_s,grupo_processo_s,nome_arquivo_s,titulo_s,tipo_documento_s,situacao_s,dt_juntada_tdt,nome_contribuinte_s,ni_contribuinte_s,unidade_origem_s,nome_usuario_juntada_doc_s,tamanho_l,score'
   });
   
-  // Adiciona facet.field múltiplos
   params.append('facet.field', 'grupo_processo_s');
   params.append('facet.field', 'tipo_processo_s');
   
-  // Adiciona filtros
   fq.forEach(filter => params.append('fq', filter));
   
   const response = await fetch(

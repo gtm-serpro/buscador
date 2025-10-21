@@ -1,12 +1,12 @@
-// stores/searchStore.ts
+// src/stores/searchStore.ts
 
 import { create } from 'zustand';
-import { Document, AppliedFilter } from '@/types/document.types';
+import type { Document } from '@/types/document.types';
+import type { AppliedFilter } from '@/types/filter.types';
 
 interface GroupCount {
   name: string;
   count: number;
-  subgroups: { name: string; count: number }[];
 }
 
 interface SearchState {
@@ -48,7 +48,7 @@ interface SearchState {
   clearFilters: () => void;
   
   setDocuments: (docs: Document[], total: number) => void;
-  setGroupCounts: (groups: any) => void;
+  setGroupCounts: (groups: { grupoProcesso: GroupCount[]; tipoProcesso: GroupCount[] }) => void;
   
   setCurrentPage: (page: number) => void;
   setIsSearching: (loading: boolean) => void;
@@ -61,7 +61,7 @@ interface SearchState {
   reset: () => void;
 }
 
-export const useSearchStore = create<SearchState>((set, get) => ({
+export const useSearchStore = create<SearchState>((set) => ({
   // Estado inicial
   query: '',
   appliedFilters: [],
@@ -84,7 +84,7 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   
   addFilter: (filter) => set((state) => {
     const exists = state.appliedFilters.find(
-      f => f.id === filter.id && f.value === filter.value
+      f => f.id === filter.id && JSON.stringify(f.value) === JSON.stringify(filter.value)
     );
     if (exists) return state;
     return { appliedFilters: [...state.appliedFilters, filter] };
@@ -92,7 +92,9 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   
   removeFilter: (filterId, value) => set((state) => ({
     appliedFilters: state.appliedFilters.filter(
-      f => value ? !(f.id === filterId && f.value === value) : f.id !== filterId
+      f => value 
+        ? !(f.id === filterId && JSON.stringify(f.value) === JSON.stringify(value))
+        : f.id !== filterId
     )
   })),
   

@@ -1,4 +1,4 @@
-// hooks/useSearch.ts
+// src/hooks/useSearch.ts
 
 import { useCallback, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -22,7 +22,7 @@ export function useSearch() {
     addToHistory,
     setQuery,
     addFilter,
-    removeFilter
+    setShowCommandModal
   } = useSearchStore();
   
   /**
@@ -51,11 +51,14 @@ export function useSearch() {
       addToHistory(query, appliedFilters);
       
       // Atualiza URL
-      syncURLWithFilters(searchParams, setSearchParams, {
+      syncURLWithFilters(setSearchParams, {
         q: query,
         filters: appliedFilters,
         page: currentPage
       });
+      
+      // Fecha o modal de busca após buscar
+      setShowCommandModal(false);
       
     } catch (error) {
       console.error('Erro na busca:', error);
@@ -63,7 +66,7 @@ export function useSearch() {
     } finally {
       setIsSearching(false);
     }
-  }, [query, appliedFilters, currentPage, pageSize]);
+  }, [query, appliedFilters, currentPage, pageSize, setDocuments, setGroupCounts, setIsSearching, setError, addToHistory, setSearchParams, setShowCommandModal]);
   
   /**
    * Busca com debounce (500ms)
@@ -71,7 +74,7 @@ export function useSearch() {
   const debouncedSearch = useDebouncedCallback(executeSearch, 500);
   
   /**
-   * Sincroniza URL com store ao carregar
+   * Sincroniza URL com store ao carregar a página
    */
   useEffect(() => {
     const urlState = syncFiltersWithURL(searchParams);
@@ -85,7 +88,8 @@ export function useSearch() {
     if (urlState.query || urlState.filters.length > 0) {
       executeSearch();
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Executa apenas uma vez ao montar - ignora warning propositalmente
   
   return {
     search: executeSearch,
