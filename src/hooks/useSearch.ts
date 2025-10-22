@@ -29,44 +29,39 @@ export function useSearch() {
    * Executa a busca
    */
   const executeSearch = useCallback(async () => {
-    if (!query && appliedFilters.length === 0) {
-      return;
-    }
-    
-    setIsSearching(true);
-    setError(null);
-    
-    try {
-      const { documents, total, facets } = await searchDocuments(
-        query,
-        appliedFilters,
-        currentPage,
-        pageSize
-      );
-      
-      setDocuments(documents, total);
-      setGroupCounts(processFacets(facets));
-      
-      // Adiciona ao histórico
-      addToHistory(query, appliedFilters);
-      
-      // Atualiza URL
-      syncURLWithFilters(setSearchParams, {
-        q: query,
-        filters: appliedFilters,
-        page: currentPage
-      });
-      
-      // Fecha o modal de busca após buscar
-      setShowCommandModal(false);
-      
-    } catch (error) {
-      console.error('Erro na busca:', error);
-      setError(error instanceof Error ? error.message : 'Erro desconhecido');
-    } finally {
-      setIsSearching(false);
-    }
-  }, [query, appliedFilters, currentPage, pageSize, setDocuments, setGroupCounts, setIsSearching, setError, addToHistory, setSearchParams, setShowCommandModal]);
+  if (!query && appliedFilters.length === 0) return;
+
+  // 🔹 Fecha o modal imediatamente
+  setShowCommandModal(false);
+  
+  // 🔹 Mostra o loading
+  setIsSearching(true);
+  setError(null);
+
+  try {
+    const { documents, total, facets } = await searchDocuments(
+      query,
+      appliedFilters,
+      currentPage,
+      pageSize
+    );
+
+    setDocuments(documents, total);
+    setGroupCounts(processFacets(facets));
+    addToHistory(query, appliedFilters);
+
+    syncURLWithFilters(setSearchParams, {
+      q: query,
+      filters: appliedFilters,
+      page: currentPage,
+    });
+  } catch (error) {
+    console.error('Erro na busca:', error);
+    setError(error instanceof Error ? error.message : 'Erro desconhecido');
+  } finally {
+    setIsSearching(false);
+  }
+}, [query, appliedFilters, currentPage, pageSize, setDocuments, setGroupCounts, setIsSearching, setError, addToHistory, setSearchParams, setShowCommandModal]);
   
   /**
    * Busca com debounce (500ms)

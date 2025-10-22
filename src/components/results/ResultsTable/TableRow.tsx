@@ -6,9 +6,30 @@ import { Badge } from '@/components/ui/badge';
 
 interface TableRowProps {
   document: Document;
+  highlightTerm?: string;
 }
 
-export default function TableRow({ document }: TableRowProps) {
+// Função para destacar texto
+function highlightText(text: string, term: string): React.ReactNode {
+  if (!term.trim()) return text;
+  
+  const parts = text.split(new RegExp(`(${term})`, 'gi'));
+  return (
+    <>
+      {parts.map((part, i) => 
+        part.toLowerCase() === term.toLowerCase() ? (
+          <mark key={i} className="bg-yellow-200 font-semibold">
+            {part}
+          </mark>
+        ) : (
+          part
+        )
+      )}
+    </>
+  );
+}
+
+export default function TableRow({ document, highlightTerm = '' }: TableRowProps) {
   const formatDate = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleDateString('pt-BR');
@@ -17,6 +38,13 @@ export default function TableRow({ document }: TableRowProps) {
     }
   };
 
+  const titulo = document.titulo_s || document.nome_arquivo_s || 'Sem título';
+  const processo = document.processo_s || '-';
+  const tipoProcesso = document.tipo_processo_s || '-';
+  const contribuinte = document.nome_contribuinte_s || '-';
+  const ni = document.ni_contribuinte_s;
+  const situacao = document.situacao_s || '-';
+
   return (
     <tr className="hover:bg-gray-50 cursor-pointer border-b transition-colors">
       <td className="px-4 py-3">
@@ -24,7 +52,7 @@ export default function TableRow({ document }: TableRowProps) {
           <FileText className="h-4 w-4 text-gray-400 shrink-0" />
           <div className="min-w-0">
             <div className="text-sm font-medium text-gray-900 truncate">
-              {document.titulo_s || document.nome_arquivo_s || 'Sem título'}
+              {highlightText(titulo, highlightTerm)}
             </div>
             <div className="text-xs text-gray-500 truncate">
               {document.tipo_documento_s || '-'}
@@ -33,21 +61,21 @@ export default function TableRow({ document }: TableRowProps) {
         </div>
       </td>
       <td className="px-4 py-3 text-sm text-gray-600">
-        {document.processo_s || '-'}
+        {highlightText(processo, highlightTerm)}
       </td>
       <td className="px-4 py-3 text-sm text-gray-600">
         <div className="max-w-xs truncate">
-          {document.tipo_processo_s || '-'}
+          {highlightText(tipoProcesso, highlightTerm)}
         </div>
       </td>
       <td className="px-4 py-3 text-sm text-gray-600">
         <div className="max-w-xs">
           <div className="truncate font-medium">
-            {document.nome_contribuinte_s || '-'}
+            {highlightText(contribuinte, highlightTerm)}
           </div>
-          {document.ni_contribuinte_s && (
+          {ni && (
             <div className="text-xs text-gray-500 truncate">
-              {document.ni_contribuinte_s}
+              {highlightText(ni, highlightTerm)}
             </div>
           )}
         </div>
@@ -57,7 +85,7 @@ export default function TableRow({ document }: TableRowProps) {
       </td>
       <td className="px-4 py-3">
         <Badge variant="outline" className="text-xs">
-          {document.situacao_s || '-'}
+          {highlightText(situacao, highlightTerm)}
         </Badge>
       </td>
     </tr>

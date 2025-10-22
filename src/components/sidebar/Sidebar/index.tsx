@@ -32,7 +32,7 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="w-72 border-r bg-gray-50 flex flex-col h-[calc(100vh-73px)]">
+    <div className="w-72 border-r bg-gray-50 flex flex-col h-[calc(100vh-65px)] overflow-auto">
       <div className="p-4 border-b bg-white">
         <h3 className="font-semibold text-sm text-gray-700 flex items-center gap-2">
           <FolderOpen className="h-4 w-4" />

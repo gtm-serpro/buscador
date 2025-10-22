@@ -63,7 +63,8 @@ function filterMockDocuments(
       doc.titulo_s?.toLowerCase().includes(lowerQuery) ||
       doc.conteudo_txt?.toLowerCase().includes(lowerQuery) ||
       doc.nome_contribuinte_s?.toLowerCase().includes(lowerQuery) ||
-      doc.processo_s?.toLowerCase().includes(lowerQuery)
+      doc.processo_s?.toLowerCase().includes(lowerQuery) ||
+      doc.conteudo_txt?.toLowerCase().includes(lowerQuery)
     );
   }
   

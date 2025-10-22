@@ -39,21 +39,34 @@ export default function SearchCommand({ onSearch, onClose }: SearchCommandProps)
     <div className="fixed inset-0 bg-black/50 flex items-start justify-center pt-20 z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl mx-4 max-h-[85vh] flex flex-col">
         {/* Header com Input de Busca */}
-        <div className="flex items-center gap-2 border-b px-4 py-3 bg-white">
-          <Search className="h-5 w-5 shrink-0 text-gray-400" />
+        <div className="p-4 bg-blue-50/50 border-b rounded-t-lg">
+        <div className="relative  mx-auto">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 h-5 w-5 pointer-events-none " />
           <Input
             type="text"
             placeholder="Digite o texto para buscar nos documentos..."
             value={localQuery}
             onChange={(e) => setLocalQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
-            autoFocus
+            className="bg-white pl-10 pr-9 h-12 text-base border border-blue-400/30 focus:border-blue-500 rounded-lg shadow-sm focus:shadow-md transition-all"
+            onFocus={(e) => e.target.placeholder = ""}
+            onBlur={(e) => e.target.placeholder = "Digite o texto para buscar nos documentos..."}
           />
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
+          {localQuery && (
+            <button
+              onClick={() => setLocalQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              aria-label="Limpar busca"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
+      </div>
+        
+
+
+
         
         {/* Filtros Selecionados */}
         <SelectedFilters />
@@ -74,7 +87,7 @@ export default function SearchCommand({ onSearch, onClose }: SearchCommandProps)
         </div>
 
         {/* Footer com Botões */}
-        <div className="border-t p-4 flex justify-between items-center bg-gray-50">
+        <div className="bborder-t p-4 flex justify-between items-center bg-gray-50 rounded-b-lg">
           <div className="text-sm text-gray-600">
             <span className="font-medium">Dica:</span> Combine a busca de texto com filtros para resultados mais precisos
           </div>
