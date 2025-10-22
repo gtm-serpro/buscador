@@ -53,7 +53,7 @@ export default function ResultsTable({ onNewSearch }: ResultsTableProps) {
           <h2 className="text-xl font-semibold text-gray-800">
             {totalDocuments.toLocaleString('pt-BR')} documento{totalDocuments !== 1 ? 's' : ''} encontrado{totalDocuments !== 1 ? 's' : ''}
           </h2>
-          <Button variant="outline" size="sm" onClick={onNewSearch}>
+          <Button  size="sm" onClick={onNewSearch}>
             <Search className="h-4 w-4 mr-2" />
             Nova busca
           </Button>
