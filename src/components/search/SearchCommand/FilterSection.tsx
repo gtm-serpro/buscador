@@ -3,11 +3,26 @@
 import { Filter } from 'lucide-react';
 import { FILTER_GROUPS } from '@/constants/filters';
 import { useFilters } from '@/hooks/useFilters';
+import { useSearchStore } from '@/stores/searchStore';
 
 export default function FilterSection() {
   const { addFilter, isFilterApplied } = useFilters();
+  const { appliedFilters, removeFilter } = useSearchStore();
 
   const handleFilterSelect = (filterId: string, label: string, field: string, type: string) => {
+    // Remove filtros vazios antes de adicionar novo
+    appliedFilters.forEach(filter => {
+      const isEmpty = 
+        filter.value === '' || 
+        (typeof filter.value === 'object' && 'from' in filter.value && !filter.value.from && !filter.value.to) ||
+        (typeof filter.value === 'object' && 'from' in filter.value && typeof filter.value.from === 'number' && filter.value.from === 0 && filter.value.to === 0);
+      
+      if (isEmpty) {
+        removeFilter(filter.id);
+      }
+    });
+
+    // Adiciona novo filtro
     if (type === 'date-range') {
       addFilter({
         id: filterId,

@@ -3,7 +3,7 @@
 import type { AppliedFilter, DateRangeValue, NumberRangeValue } from '@/types/filter.types';
 import type { Document, SolrResponse } from '@/types/document.types';
 import { FILTERS_MAP } from '@/constants/filters';
-import { MOCK_DOCUMENTS, MOCK_FACETS } from './mockData';
+import { MOCK_DOCUMENTS, generateFacetsFromDocuments } from './mockData';
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'; // Controla se usa mock ou não
 const SOLR_BASE_URL = import.meta.env.VITE_SOLR_URL || 'http://localhost:8983/solr';
@@ -55,10 +55,11 @@ function filterMockDocuments(
 ): Document[] {
   let filtered = [...MOCK_DOCUMENTS];
   
-  // Filtra por query
+  // Filtra por query nos campos específicos
   if (query && query !== '*:*') {
     const lowerQuery = query.toLowerCase();
     filtered = filtered.filter(doc => 
+      doc.nome_arquivo_s?.toLowerCase().includes(lowerQuery) ||
       doc.titulo_s?.toLowerCase().includes(lowerQuery) ||
       doc.conteudo_txt?.toLowerCase().includes(lowerQuery) ||
       doc.nome_contribuinte_s?.toLowerCase().includes(lowerQuery) ||
@@ -106,15 +107,18 @@ export async function searchDocuments(
   await new Promise(resolve => setTimeout(resolve, 500));
   
   if (USE_MOCK) {
-    // Usa dados mockados
+  // Usa dados mockados
     const filtered = filterMockDocuments(query, filters);
     const start = (page - 1) * pageSize;
     const paged = filtered.slice(start, start + pageSize);
     
+    // Gera facetas dinamicamente dos documentos filtrados
+    const dynamicFacets = generateFacetsFromDocuments(filtered);
+    
     return {
       documents: paged,
       total: filtered.length,
-      facets: MOCK_FACETS
+      facets: dynamicFacets // ← Mudança aqui
     };
   }
   
