@@ -30,7 +30,8 @@ export function useSearch() {
    */
   const executeSearch = useCallback(
     async (forcedQuery?: string) => {
-      const effectiveQuery = forcedQuery ?? query;
+      // const effectiveQuery = forcedQuery ?? query;
+      const effectiveQuery = forcedQuery ?? useSearchStore.getState().query;
       if (!effectiveQuery && appliedFilters.length === 0) return;
 
       setShowCommandModal(false);
