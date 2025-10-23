@@ -114,6 +114,8 @@ interface DateRangeBadgeProps {
 function DateRangeBadge({ filter, onRemove, onUpdate }: DateRangeBadgeProps) {
   const hasValues = typeof filter.value === 'object' && 'from' in filter.value && (filter.value.from || filter.value.to);
   const [isEditing, setIsEditing] = useState(!hasValues);
+  const [isFromOpen, setIsFromOpen] = useState(false);
+  const [isToOpen, setIsToOpen] = useState(false);
   
   const [dateRange, setDateRange] = useState<DateRangeValue>(
     typeof filter.value === 'object' && 'from' in filter.value
@@ -125,6 +127,12 @@ function DateRangeBadge({ filter, onRemove, onUpdate }: DateRangeBadgeProps) {
   );
   const [toDate, setToDate] = useState<Date | undefined>(
     dateRange.to ? new Date(dateRange.to) : undefined
+  );
+  const [fromInputValue, setFromInputValue] = useState(
+    dateRange.from ? format(new Date(dateRange.from), 'dd/MM/yyyy') : ''
+  );
+  const [toInputValue, setToInputValue] = useState(
+    dateRange.to ? format(new Date(dateRange.to), 'dd/MM/yyyy') : ''
   );
 
   const formatDisplayValue = () => {
@@ -154,92 +162,121 @@ function DateRangeBadge({ filter, onRemove, onUpdate }: DateRangeBadgeProps) {
     }
   };
 
-  if (isEditing) {
+  const applyDateMask = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 2) return numbers;
+    if (numbers.length <= 4) return `${numbers.slice(0, 2)}/${numbers.slice(2)}`;
+    return `${numbers.slice(0, 2)}/${numbers.slice(2, 4)}/${numbers.slice(4, 8)}`;
+  };
+
   const handleManualInput = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    value: string,
     type: 'from' | 'to'
   ) => {
-    const value = e.target.value;
-    const [day, month, year] = value.split('/');
-    const parsed = new Date(`${year}-${month}-${day}`);
-
-    if (!isNaN(parsed.getTime())) {
-      if (type === 'from') setFromDate(parsed);
-      else setToDate(parsed);
+    const maskedValue = applyDateMask(value);
+    
+    if (type === 'from') {
+      setFromInputValue(maskedValue);
+    } else {
+      setToInputValue(maskedValue);
+    }
+    
+    const [day, month, year] = maskedValue.split('/');
+    
+    if (day && month && year && year.length === 4) {
+      const parsed = new Date(`${year}-${month}-${day}`);
+      if (!isNaN(parsed.getTime())) {
+        if (type === 'from') {
+          setFromDate(parsed);
+        } else {
+          setToDate(parsed);
+        }
+      }
     }
   };
 
-  return (
-    <div className="inline-flex items-center gap-2 px-2 py-1 bg-blue-100 border border-blue-300 rounded-md">
-      <span className="text-xs font-medium text-blue-900">
-        {filter.label}:
-      </span>
+  if (isEditing) {
+    return (
+      <div className="inline-flex items-center gap-2 px-2 py-1 bg-blue-100 border border-blue-300 rounded-md">
+        <span className="text-xs font-medium text-blue-900">
+          {filter.label}:
+        </span>
 
-      {/* Date From */}
-      <div className="relative flex items-center">
-        <input
-          type="text"
-          value={fromDate ? format(fromDate, 'dd/MM/yyyy') : ''}
-          onChange={(e) => handleManualInput(e, 'from')}
-          placeholder="De"
-          className="w-24 px-2 py-1 text-xs bg-white border border-blue-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-        <Popover>
-          <PopoverTrigger asChild>
-            <CalendarIcon className="absolute right-1.5 top-1.5 h-4 w-4 text-blue-700 cursor-pointer" />
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={fromDate}
-              onSelect={setFromDate}
-              locale={ptBR}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
+        {/* Date From */}
+        <div className="relative flex items-center">
+          <input
+            maxLength={10}
+            type="text"
+            value={fromInputValue}
+            onChange={(e) => handleManualInput(e.target.value, 'from')}
+            placeholder="dd/mm/aaaa"
+            className="w-24 px-2 py-1 text-xs bg-white border border-blue-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+          <Popover open={isFromOpen} onOpenChange={setIsFromOpen}> 
+            <PopoverTrigger asChild>
+              <CalendarIcon className="absolute right-1.5 top-1.5 h-4 w-4 text-blue-700 cursor-pointer" />
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={fromDate}
+                onSelect={(date) => {
+                  setFromDate(date);
+                  setFromInputValue(date ? format(date, 'dd/MM/yyyy') : '');
+                  setIsFromOpen(false);
+                }}
+                locale={ptBR}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {/* Date To */}
+        <div className="relative flex items-center">
+          <input
+            maxLength={10}
+            type="text"
+            value={toInputValue}
+            onChange={(e) => handleManualInput(e.target.value, 'to')}
+            placeholder="dd/mm/aaaa"
+            className="w-24 px-2 py-1 text-xs bg-white border border-blue-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+          <Popover open={isToOpen} onOpenChange={setIsToOpen}>
+            <PopoverTrigger asChild>
+              <CalendarIcon className="absolute right-1.5 top-1.5 h-4 w-4 text-blue-700 cursor-pointer" />
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={toDate}
+                onSelect={(date) => {
+                  setToDate(date);
+                  setToInputValue(date ? format(date, 'dd/MM/yyyy') : '');
+                  setIsToOpen(false);
+                }}
+                locale={ptBR}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        <button
+          onClick={handleConfirm}
+          className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+        >
+          <Check className="h-3 w-3 text-blue-700" />
+        </button>
+        <button
+          onClick={onRemove}
+          className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+        >
+          <X className="h-3 w-3 text-blue-700" />
+        </button>
       </div>
-
-      {/* Date To */}
-      <div className="relative flex items-center">
-        <input
-          type="text"
-          value={toDate ? format(toDate, 'dd/MM/yyyy') : ''}
-          onChange={(e) => handleManualInput(e, 'to')}
-          placeholder="Até"
-          className="w-24 px-2 py-1 text-xs bg-white border border-blue-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-        <Popover>
-          <PopoverTrigger asChild>
-            <CalendarIcon className="absolute right-1.5 top-1.5 h-4 w-4 text-blue-700 cursor-pointer" />
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={toDate}
-              onSelect={setToDate}
-              locale={ptBR}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
-
-      <button
-        onClick={handleConfirm}
-        className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
-      >
-        <Check className="h-3 w-3 text-blue-700" />
-      </button>
-      <button
-        onClick={onRemove}
-        className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
-      >
-        <X className="h-3 w-3 text-blue-700" />
-      </button>
-    </div>
-  );
-}
+    );
+  }
 
   return (
     <Badge 
