@@ -5,7 +5,6 @@ import { X, Check, Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useFilters } from '@/hooks/useFilters';
@@ -156,23 +155,38 @@ function DateRangeBadge({ filter, onRemove, onUpdate }: DateRangeBadgeProps) {
   };
 
   if (isEditing) {
-    return (
-      <div className="inline-flex items-center gap-2 px-2 py-1 bg-blue-100 border border-blue-300 rounded-md">
-        <span className="text-xs font-medium text-blue-900">
-          {filter.label}:
-        </span>
-        
-        {/* Date From */}
+  const handleManualInput = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: 'from' | 'to'
+  ) => {
+    const value = e.target.value;
+    const [day, month, year] = value.split('/');
+    const parsed = new Date(`${year}-${month}-${day}`);
+
+    if (!isNaN(parsed.getTime())) {
+      if (type === 'from') setFromDate(parsed);
+      else setToDate(parsed);
+    }
+  };
+
+  return (
+    <div className="inline-flex items-center gap-2 px-2 py-1 bg-blue-100 border border-blue-300 rounded-md">
+      <span className="text-xs font-medium text-blue-900">
+        {filter.label}:
+      </span>
+
+      {/* Date From */}
+      <div className="relative flex items-center">
+        <input
+          type="text"
+          value={fromDate ? format(fromDate, 'dd/MM/yyyy') : ''}
+          onChange={(e) => handleManualInput(e, 'from')}
+          placeholder="De"
+          className="w-24 px-2 py-1 text-xs bg-white border border-blue-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
         <Popover>
           <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 text-xs justify-start text-left font-normal"
-            >
-              <CalendarIcon className="mr-2 h-3 w-3" />
-              {fromDate ? format(fromDate, 'dd/MM/yyyy') : 'De'}
-            </Button>
+            <CalendarIcon className="absolute right-1.5 top-1.5 h-4 w-4 text-blue-700 cursor-pointer" />
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
             <Calendar
@@ -184,18 +198,20 @@ function DateRangeBadge({ filter, onRemove, onUpdate }: DateRangeBadgeProps) {
             />
           </PopoverContent>
         </Popover>
+      </div>
 
-        {/* Date To */}
+      {/* Date To */}
+      <div className="relative flex items-center">
+        <input
+          type="text"
+          value={toDate ? format(toDate, 'dd/MM/yyyy') : ''}
+          onChange={(e) => handleManualInput(e, 'to')}
+          placeholder="Até"
+          className="w-24 px-2 py-1 text-xs bg-white border border-blue-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
         <Popover>
           <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 text-xs justify-start text-left font-normal"
-            >
-              <CalendarIcon className="mr-2 h-3 w-3" />
-              {toDate ? format(toDate, 'dd/MM/yyyy') : 'Até'}
-            </Button>
+            <CalendarIcon className="absolute right-1.5 top-1.5 h-4 w-4 text-blue-700 cursor-pointer" />
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
             <Calendar
@@ -207,22 +223,23 @@ function DateRangeBadge({ filter, onRemove, onUpdate }: DateRangeBadgeProps) {
             />
           </PopoverContent>
         </Popover>
-
-        <button
-          onClick={handleConfirm}
-          className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
-        >
-          <Check className="h-3 w-3 text-blue-700" />
-        </button>
-        <button
-          onClick={onRemove}
-          className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
-        >
-          <X className="h-3 w-3 text-blue-700" />
-        </button>
       </div>
-    );
-  }
+
+      <button
+        onClick={handleConfirm}
+        className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+      >
+        <Check className="h-3 w-3 text-blue-700" />
+      </button>
+      <button
+        onClick={onRemove}
+        className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+      >
+        <X className="h-3 w-3 text-blue-700" />
+      </button>
+    </div>
+  );
+}
 
   return (
     <Badge 
