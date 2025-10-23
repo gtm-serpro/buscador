@@ -9,7 +9,6 @@ export function useSearch() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const {
-    query,
     appliedFilters,
     currentPage,
     pageSize,
@@ -30,8 +29,9 @@ export function useSearch() {
    */
   const executeSearch = useCallback(
     async (forcedQuery?: string) => {
-      // const effectiveQuery = forcedQuery ?? query;
+      // Pega o query SEMPRE atualizado direto do store
       const effectiveQuery = forcedQuery ?? useSearchStore.getState().query;
+      
       if (!effectiveQuery && appliedFilters.length === 0) return;
 
       setShowCommandModal(false);
@@ -50,7 +50,6 @@ export function useSearch() {
         setGroupCounts(processFacets(facets));
         addToHistory(effectiveQuery, appliedFilters);
 
-        // atualiza query no estado global
         setQuery(effectiveQuery);
 
         // sincroniza URL
@@ -72,7 +71,7 @@ export function useSearch() {
       }
     },
     [
-      query,
+      // query REMOVIDO daqui ✅
       appliedFilters,
       currentPage,
       pageSize,
