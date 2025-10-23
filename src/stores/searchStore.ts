@@ -59,6 +59,9 @@ interface SearchState {
   clearHistory: () => void;
   
   reset: () => void;
+
+  hasLoadedFromURL: boolean;
+  setHasLoadedFromURL: (val: boolean) => void;
 }
 
 export const useSearchStore = create<SearchState>((set) => ({
@@ -78,6 +81,8 @@ export const useSearchStore = create<SearchState>((set) => ({
   hasSearched: false,
   error: null,
   searchHistory: [],
+  hasLoadedFromURL: false,
+  setHasLoadedFromURL: (val) => set({ hasLoadedFromURL: val }),
   
   // Actions
   setQuery: (query) => set({ query }),

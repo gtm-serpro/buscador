@@ -9,7 +9,7 @@ import SelectedFilters from './SelectedFilters';
 import FilterSection from './FilterSection';
 
 interface SearchCommandProps {
-  onSearch: () => void;
+  onSearch: (term: string) => void;
   onClose: () => void;
 }
 
@@ -23,7 +23,7 @@ export default function SearchCommand({ onSearch, onClose }: SearchCommandProps)
 
   const handleSearch = () => {
     setQuery(localQuery);
-    onSearch();
+    onSearch(localQuery); // <-- passa o termo diretamente
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

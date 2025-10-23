@@ -1,6 +1,4 @@
-// src/hooks/useSearch.ts
-
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useDebouncedCallback } from 'use-debounce';
 import { useSearchStore } from '@/stores/searchStore';
@@ -9,14 +7,14 @@ import { syncFiltersWithURL, syncURLWithFilters } from '@/utils/urlParams';
 
 export function useSearch() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const isInitialMount = useRef(true);
-  const lastSearchParams = useRef<string>('');
-  
+
   const {
     query,
     appliedFilters,
     currentPage,
     pageSize,
+    hasLoadedFromURL,
+    setHasLoadedFromURL,
     setDocuments,
     setGroupCounts,
     setIsSearching,
@@ -26,77 +24,95 @@ export function useSearch() {
     addFilter,
     setShowCommandModal
   } = useSearchStore();
-  
+
   /**
    * Executa a busca
    */
-  const executeSearch = useCallback(async () => {
-    if (!query && appliedFilters.length === 0) return;
+  const executeSearch = useCallback(
+    async (forcedQuery?: string) => {
+      const effectiveQuery = forcedQuery ?? query;
+      if (!effectiveQuery && appliedFilters.length === 0) return;
 
-    // Previne busca duplicada comparando parâmetros
-    const currentParams = `${query}-${JSON.stringify(appliedFilters)}-${currentPage}`;
-    if (currentParams === lastSearchParams.current) {
-      return;
-    }
-    lastSearchParams.current = currentParams;
+      setShowCommandModal(false);
+      setIsSearching(true);
+      setError(null);
 
-    setShowCommandModal(false);
-    setIsSearching(true);
-    setError(null);
+      try {
+        const { documents, total, facets } = await searchDocuments(
+          effectiveQuery,
+          appliedFilters,
+          currentPage,
+          pageSize
+        );
 
-    try {
-      const { documents, total, facets } = await searchDocuments(
-        query,
-        appliedFilters,
-        currentPage,
-        pageSize
-      );
+        setDocuments(documents, total);
+        setGroupCounts(processFacets(facets));
+        addToHistory(effectiveQuery, appliedFilters);
 
-      setDocuments(documents, total);
-      setGroupCounts(processFacets(facets));
-      addToHistory(query, appliedFilters);
+        // atualiza query no estado global
+        setQuery(effectiveQuery);
 
-      syncURLWithFilters(setSearchParams, {
-        q: query,
-        filters: appliedFilters,
-        page: currentPage,
-      });
-    } catch (error) {
-      console.error('Erro na busca:', error);
-      setError(error instanceof Error ? error.message : 'Erro desconhecido');
-    } finally {
-      setIsSearching(false);
-    }
-  }, [query, appliedFilters, currentPage, pageSize, setDocuments, setGroupCounts, setIsSearching, setError, addToHistory, setSearchParams, setShowCommandModal]);
-  
-  /**
-   * Busca com debounce (500ms)
-   */
+        // sincroniza URL
+        const currentUrl = syncFiltersWithURL(searchParams);
+        const nextUrl = { q: effectiveQuery, filters: appliedFilters, page: currentPage };
+
+        if (
+          currentUrl.query !== nextUrl.q ||
+          JSON.stringify(currentUrl.filters) !== JSON.stringify(nextUrl.filters) ||
+          currentUrl.page !== nextUrl.page
+        ) {
+          syncURLWithFilters(setSearchParams, nextUrl);
+        }
+      } catch (error) {
+        console.error('Erro na busca:', error);
+        setError(error instanceof Error ? error.message : 'Erro desconhecido');
+      } finally {
+        setIsSearching(false);
+      }
+    },
+    [
+      query,
+      appliedFilters,
+      currentPage,
+      pageSize,
+      setDocuments,
+      setGroupCounts,
+      setIsSearching,
+      setError,
+      addToHistory,
+      searchParams,
+      setSearchParams,
+      setShowCommandModal,
+      setQuery,
+    ]
+  );
+
+
+
   const debouncedSearch = useDebouncedCallback(executeSearch, 500);
-  
+
   /**
-   * Sincroniza URL com store ao carregar a página (apenas uma vez)
+   * Carrega estado da URL apenas uma vez
    */
   useEffect(() => {
-    if (!isInitialMount.current) return;
-    isInitialMount.current = false;
+    if (hasLoadedFromURL) return;
 
     const urlState = syncFiltersWithURL(searchParams);
-    
-    if (urlState.query) setQuery(urlState.query);
-    if (urlState.filters.length > 0) {
-      urlState.filters.forEach(filter => addFilter(filter));
-    }
-    
-    // Se tem query ou filtros na URL, executa busca
+
     if (urlState.query || urlState.filters.length > 0) {
-      executeSearch();
+      if (urlState.query) setQuery(urlState.query);
+      urlState.filters.forEach((f) => addFilter(f));
+      setHasLoadedFromURL(true);
+
+      // executa busca após aplicar filtros
+      setTimeout(() => executeSearch(), 0);
+    } else {
+      setHasLoadedFromURL(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  
+  }, [hasLoadedFromURL, searchParams, setQuery, addFilter, setHasLoadedFromURL, executeSearch]);
+
   return {
     search: executeSearch,
-    debouncedSearch
+    debouncedSearch,
   };
 }
