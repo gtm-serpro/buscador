@@ -1,6 +1,6 @@
 // src/hooks/useSearch.ts
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useDebouncedCallback } from 'use-debounce';
 import { useSearchStore } from '@/stores/searchStore';
@@ -9,6 +9,8 @@ import { syncFiltersWithURL, syncURLWithFilters } from '@/utils/urlParams';
 
 export function useSearch() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const isInitialMount = useRef(true);
+  const lastSearchParams = useRef<string>('');
   
   const {
     query,
@@ -29,39 +31,43 @@ export function useSearch() {
    * Executa a busca
    */
   const executeSearch = useCallback(async () => {
-  if (!query && appliedFilters.length === 0) return;
+    if (!query && appliedFilters.length === 0) return;
 
-  // 🔹 Fecha o modal imediatamente
-  setShowCommandModal(false);
-  
-  // 🔹 Mostra o loading
-  setIsSearching(true);
-  setError(null);
+    // Previne busca duplicada comparando parâmetros
+    const currentParams = `${query}-${JSON.stringify(appliedFilters)}-${currentPage}`;
+    if (currentParams === lastSearchParams.current) {
+      return;
+    }
+    lastSearchParams.current = currentParams;
 
-  try {
-    const { documents, total, facets } = await searchDocuments(
-      query,
-      appliedFilters,
-      currentPage,
-      pageSize
-    );
+    setShowCommandModal(false);
+    setIsSearching(true);
+    setError(null);
 
-    setDocuments(documents, total);
-    setGroupCounts(processFacets(facets));
-    addToHistory(query, appliedFilters);
+    try {
+      const { documents, total, facets } = await searchDocuments(
+        query,
+        appliedFilters,
+        currentPage,
+        pageSize
+      );
 
-    syncURLWithFilters(setSearchParams, {
-      q: query,
-      filters: appliedFilters,
-      page: currentPage,
-    });
-  } catch (error) {
-    console.error('Erro na busca:', error);
-    setError(error instanceof Error ? error.message : 'Erro desconhecido');
-  } finally {
-    setIsSearching(false);
-  }
-}, [query, appliedFilters, currentPage, pageSize, setDocuments, setGroupCounts, setIsSearching, setError, addToHistory, setSearchParams, setShowCommandModal]);
+      setDocuments(documents, total);
+      setGroupCounts(processFacets(facets));
+      addToHistory(query, appliedFilters);
+
+      syncURLWithFilters(setSearchParams, {
+        q: query,
+        filters: appliedFilters,
+        page: currentPage,
+      });
+    } catch (error) {
+      console.error('Erro na busca:', error);
+      setError(error instanceof Error ? error.message : 'Erro desconhecido');
+    } finally {
+      setIsSearching(false);
+    }
+  }, [query, appliedFilters, currentPage, pageSize, setDocuments, setGroupCounts, setIsSearching, setError, addToHistory, setSearchParams, setShowCommandModal]);
   
   /**
    * Busca com debounce (500ms)
@@ -69,9 +75,12 @@ export function useSearch() {
   const debouncedSearch = useDebouncedCallback(executeSearch, 500);
   
   /**
-   * Sincroniza URL com store ao carregar a página
+   * Sincroniza URL com store ao carregar a página (apenas uma vez)
    */
   useEffect(() => {
+    if (!isInitialMount.current) return;
+    isInitialMount.current = false;
+
     const urlState = syncFiltersWithURL(searchParams);
     
     if (urlState.query) setQuery(urlState.query);
@@ -84,7 +93,7 @@ export function useSearch() {
       executeSearch();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Executa apenas uma vez ao montar - ignora warning propositalmente
+  }, []);
   
   return {
     search: executeSearch,
