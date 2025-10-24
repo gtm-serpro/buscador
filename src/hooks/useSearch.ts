@@ -9,7 +9,6 @@ export function useSearch() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const {
-    appliedFilters,
     currentPage,
     pageSize,
     hasLoadedFromURL,
@@ -29,10 +28,11 @@ export function useSearch() {
    */
   const executeSearch = useCallback(
     async (forcedQuery?: string) => {
-      // Pega o query SEMPRE atualizado direto do store
+      // Pega SEMPRE os valores atualizados direto do store
       const effectiveQuery = forcedQuery ?? useSearchStore.getState().query;
+      const currentFilters = useSearchStore.getState().appliedFilters; // ← ADICIONE ESTA LINHA
       
-      if (!effectiveQuery && appliedFilters.length === 0) return;
+      if (!effectiveQuery && currentFilters.length === 0) return;
 
       setShowCommandModal(false);
       setIsSearching(true);
@@ -41,20 +41,20 @@ export function useSearch() {
       try {
         const { documents, total, facets } = await searchDocuments(
           effectiveQuery,
-          appliedFilters,
+          currentFilters, // ← USE currentFilters aqui
           currentPage,
           pageSize
         );
 
         setDocuments(documents, total);
         setGroupCounts(processFacets(facets));
-        addToHistory(effectiveQuery, appliedFilters);
+        addToHistory(effectiveQuery, currentFilters); // ← E aqui
 
         setQuery(effectiveQuery);
 
         // sincroniza URL
         const currentUrl = syncFiltersWithURL(searchParams);
-        const nextUrl = { q: effectiveQuery, filters: appliedFilters, page: currentPage };
+        const nextUrl = { q: effectiveQuery, filters: currentFilters, page: currentPage }; // ← E aqui
 
         if (
           currentUrl.query !== nextUrl.q ||
@@ -71,8 +71,7 @@ export function useSearch() {
       }
     },
     [
-      // query REMOVIDO daqui ✅
-      appliedFilters,
+      // appliedFilters REMOVIDO daqui também ✅
       currentPage,
       pageSize,
       setDocuments,
@@ -86,8 +85,6 @@ export function useSearch() {
       setQuery,
     ]
   );
-
-
 
   const debouncedSearch = useDebouncedCallback(executeSearch, 500);
 

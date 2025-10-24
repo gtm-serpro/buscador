@@ -35,9 +35,9 @@ export default function GroupItem({
     <div className="mb-1">
       <button
         onClick={handleToggle}
-        className="w-full px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-200 rounded-md transition-colors flex items-center justify-between group"
+        className="w-full px-2 py-1 text-xs font-medium text-gray-800 hover:bg-gray-200 rounded-md transition-colors flex items-center justify-between group"
       >
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-1 min-w-0">
           {hasSubgroups && (
             isExpanded ? (
               <ChevronDown className="h-4 w-4 shrink-0" />
