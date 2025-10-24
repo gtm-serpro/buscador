@@ -213,34 +213,16 @@ export const FILTER_GROUPS = {
     label: 'Datas',
     filters: AVAILABLE_FILTERS.filter(f => f.type === 'date-range')
   },
-  documento: {
-    label: 'Documento',
-    filters: AVAILABLE_FILTERS.filter(f => 
-      ['tipo_documento', 'titulo_documento', 'nr_doc_principal'].includes(f.id)
-    )
-  },
   unidades: {
     label: 'Unidades e Equipes',
     filters: AVAILABLE_FILTERS.filter(f => 
       ['unidade_origem', 'unidade_atual', 'equipe_origem', 'equipe_atual'].includes(f.id)
     )
   },
-  contribuinte: {
-    label: 'Contribuinte',
-    filters: AVAILABLE_FILTERS.filter(f => 
-      ['nome_contribuinte', 'ni_contribuinte', 'cpf_responsavel'].includes(f.id)
-    )
-  },
   julgamento: {
     label: 'Julgamento',
     filters: AVAILABLE_FILTERS.filter(f => 
       ['result_julgamento_drj_1', 'result_julgamento_drj_2', 'alegacoes_recurso', 'nome_relator_drj'].includes(f.id)
-    )
-  },
-  tributario: {
-    label: 'Tributário',
-    filters: AVAILABLE_FILTERS.filter(f => 
-      ['tributo_act', 'assuntos_objetos'].includes(f.id)
     )
   },
   processo: {
@@ -251,11 +233,31 @@ export const FILTER_GROUPS = {
   },
   
   
+  documento: {
+    label: 'Documento',
+    filters: AVAILABLE_FILTERS.filter(f => 
+      ['tipo_documento', 'titulo_documento', 'nr_doc_principal'].includes(f.id)
+    )
+  },
+  
+  contribuinte: {
+    label: 'Contribuinte',
+    filters: AVAILABLE_FILTERS.filter(f => 
+      ['nome_contribuinte', 'ni_contribuinte', 'cpf_responsavel'].includes(f.id)
+    )
+  },
+  
+  tributario: {
+    label: 'Tributário',
+    filters: AVAILABLE_FILTERS.filter(f => 
+      ['tributo_act', 'assuntos_objetos'].includes(f.id)
+    )
+  },
   
   outros: {
     label: 'Outros',
     filters: AVAILABLE_FILTERS.filter(f => 
       ['nome_usuario_juntada'].includes(f.id)
     )
-  }
+  },
 };
