@@ -22,6 +22,7 @@ export default function TableHeader() {
         <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
           Situação
         </th>
+        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Ações</th>
       </tr>
     </thead>
   );

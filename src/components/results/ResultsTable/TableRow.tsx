@@ -1,12 +1,15 @@
 // src/components/results/ResultsTable/TableRow.tsx
 
 import type { Document } from '@/types/document.types';
-import { FileText } from 'lucide-react';
+import { FileText, Eye, Download } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface TableRowProps {
   document: Document;
   highlightTerm?: string;
+  onPreview?: (document: Document) => void;
+  onDownload?: (document: Document) => void;
 }
 
 // Função para destacar texto
@@ -29,7 +32,12 @@ function highlightText(text: string, term: string): React.ReactNode {
   );
 }
 
-export default function TableRow({ document, highlightTerm = '' }: TableRowProps) {
+export default function TableRow({ 
+  document, 
+  highlightTerm = '',
+  onPreview,
+  onDownload 
+}: TableRowProps) {
   const formatDate = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleDateString('pt-BR');
@@ -45,8 +53,18 @@ export default function TableRow({ document, highlightTerm = '' }: TableRowProps
   const ni = document.ni_contribuinte_s;
   const situacao = document.situacao_s || '-';
 
+  const handlePreview = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onPreview?.(document);
+  };
+
+  const handleDownload = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDownload?.(document);
+  };
+
   return (
-    <tr className="hover:bg-gray-50 cursor-pointer border-b transition-colors">
+    <tr className="hover:bg-gray-50 border-b transition-colors group">
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 text-gray-400 shrink-0" />
@@ -87,6 +105,28 @@ export default function TableRow({ document, highlightTerm = '' }: TableRowProps
         <Badge variant="outline" className="text-xs">
           {highlightText(situacao, highlightTerm)}
         </Badge>
+      </td>
+      <td className="px-4 py-3">
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handlePreview}
+            className="h-8 w-8 p-0"
+            title="Visualizar"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleDownload}
+            className="h-8 w-8 p-0"
+            title="Download"
+          >
+            <Download className="h-4 w-4" />
+          </Button>
+        </div>
       </td>
     </tr>
   );
