@@ -105,7 +105,7 @@ export default function TableRow({
             ) : (
               <ChevronRight className="h-4 w-4 text-gray-400 shrink-0" />
             )}
-            <FileText className="h-4 w-4 text-blue-500 shrink-0" />
+            <FileText className="h-4 w-4 text-primary shrink-0" />
             <div className="min-w-0 flex-1">
               <div className="text-sm font-medium text-gray-900 truncate">
                 {highlightText(titulo, highlightTerm)}
