@@ -1,7 +1,6 @@
 // src/components/results/ResultsTable/index.tsx
 
 import { useState } from 'react';
-import type { Document } from '@/types/document.types';
 import { useSearchStore } from '@/stores/searchStore';
 import { useSearch } from '@/hooks/useSearch';
 import { Search, X } from 'lucide-react';
@@ -46,16 +45,6 @@ export default function ResultsTable({ onNewSearch }: ResultsTableProps) {
     setLocalFilter('');
   };
 
-  const handlePreview = (doc: Document) => {
-    // TODO: Implementar preview de documento
-    console.log('Preview:', doc);
-  };
-
-  const handleDownload = (doc: Document) => {
-    // TODO: Implementar download de documento
-    console.log('Download:', doc);
-  };
-
   return (
     <div className="flex-1 flex flex-col h-[calc(100vh-73px)]">
       {/* Header */}
@@ -64,7 +53,7 @@ export default function ResultsTable({ onNewSearch }: ResultsTableProps) {
           <h2 className="text-xl font-semibold text-gray-800">
             {totalDocuments.toLocaleString('pt-BR')} documento{totalDocuments !== 1 ? 's' : ''} encontrado{totalDocuments !== 1 ? 's' : ''}
           </h2>
-          <Button size="sm" onClick={onNewSearch}>
+          <Button  size="sm" onClick={onNewSearch}>
             <Search className="h-4 w-4 mr-2" />
             Nova busca
           </Button>
@@ -108,8 +97,6 @@ export default function ResultsTable({ onNewSearch }: ResultsTableProps) {
                   key={doc.id} 
                   document={doc}
                   highlightTerm={localFilter}
-                  onPreview={handlePreview}
-                  onDownload={handleDownload}
                 />
               ))}
             </tbody>

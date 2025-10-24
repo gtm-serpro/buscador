@@ -2,13 +2,16 @@
 
 export default function TableHeader() {
   return (
-    <thead className="bg-gray-50 border-b sticky top-0 z-10">
+    <thead className="bg-gray-50 border-b">
       <tr>
         <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-          Documento
+          Título
         </th>
         <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
           Processo
+        </th>
+        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+          Tipo Processo
         </th>
         <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
           Contribuinte
@@ -19,9 +22,7 @@ export default function TableHeader() {
         <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
           Situação
         </th>
-        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-          Ações
-        </th>
+        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Ações</th>
       </tr>
     </thead>
   );
