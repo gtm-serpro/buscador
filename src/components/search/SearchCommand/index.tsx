@@ -39,7 +39,7 @@ export default function SearchCommand({ onSearch, onClose }: SearchCommandProps)
     <div className="fixed inset-0 bg-black/50 flex items-start justify-center pt-20 z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl mx-4 max-h-[85vh] flex flex-col">
         {/* Header com Input de Busca */}
-        <div className="p-4 bg-blue-50/50 border-b rounded-t-lg">
+        <div className="p-4 bg-blue-500 border-b rounded-t-lg">
         <div className="relative  mx-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 h-5 w-5 pointer-events-none " />
           <Input
