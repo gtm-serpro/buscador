@@ -1,4 +1,5 @@
 // src/components/sidebar/Sidebar/index.tsx
+
 import { useSearchStore } from '@/stores/searchStore';
 import { useFilters } from '@/hooks/useFilters';
 import { useSearch } from '@/hooks/useSearch';
@@ -22,9 +23,7 @@ export default function Sidebar() {
       value: groupName
     });
     
-    // Usa setTimeout com delay zero para garantir que o estado foi atualizado
     setTimeout(() => {
-      // Força re-execução da busca
       search();
     }, 0);
   };
@@ -45,15 +44,15 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="w-72 border-r bg-gray-50 flex flex-col h-[calc(100vh-69px)] overflow-auto">
-      <div className="p-4 border-b bg-white">
+    <div className="w-72 md:w-72 border-r bg-gray-50 flex flex-col h-full md:h-[calc(100vh-69px)] overflow-hidden">
+      <div className="p-3 md:p-4 border-b bg-white shrink-0">
         <h3 className="font-semibold text-sm text-gray-700 flex items-center gap-2">
           <FolderOpen className="h-4 w-4" />
           Grupos e Tipos
         </h3>
       </div>
 
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="flex-1 p-3 md:p-4">
         {/* Grupo Processo */}
         {groupCounts.grupoProcesso.length > 0 && (
           <div className="mb-6">

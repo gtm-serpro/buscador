@@ -27,7 +27,6 @@ export default function ResultsTable({ onNewSearch }: ResultsTableProps) {
     search();
   };
 
-  // Filtra documentos localmente
   const filteredDocuments = localFilter.trim()
     ? documents.filter(doc => {
         const searchTerm = localFilter.toLowerCase();
@@ -47,24 +46,22 @@ export default function ResultsTable({ onNewSearch }: ResultsTableProps) {
   };
 
   const handlePreview = (doc: Document) => {
-    // TODO: Implementar preview de documento
     console.log('Preview:', doc);
   };
 
   const handleDownload = (doc: Document) => {
-    // TODO: Implementar download de documento
     console.log('Download:', doc);
   };
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-73px)]">
-      {/* Header */}
-      <div className="px-6 py-4 border-b bg-white space-y-3">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-800">
+    <div className="flex-1 flex flex-col min-h-0">
+      {/* Header - Responsivo */}
+      <div className="px-4 md:px-6 py-3 md:py-4 border-b bg-white space-y-3 shrink-0">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <h2 className="text-lg md:text-xl font-semibold text-gray-800">
             {totalDocuments.toLocaleString('pt-BR')} documento{totalDocuments !== 1 ? 's' : ''} encontrado{totalDocuments !== 1 ? 's' : ''}
           </h2>
-          <Button size="sm" onClick={onNewSearch}>
+          <Button size="sm" onClick={onNewSearch} className="w-full sm:w-auto">
             <Search className="h-4 w-4 mr-2" />
             Nova busca
           </Button>
@@ -75,7 +72,7 @@ export default function ResultsTable({ onNewSearch }: ResultsTableProps) {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             type="text"
-            placeholder="Filtrar resultados exibidos..."
+            placeholder="Filtrar resultados..."
             value={localFilter}
             onChange={(e) => setLocalFilter(e.target.value)}
             className="pl-10 pr-10"
@@ -97,23 +94,27 @@ export default function ResultsTable({ onNewSearch }: ResultsTableProps) {
         )}
       </div>
 
-      {/* Tabela */}
+      {/* Tabela - Com scroll horizontal no mobile */}
       <div className="flex-1 overflow-auto">
         {filteredDocuments.length > 0 ? (
-          <table className="w-full">
-            <TableHeader />
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredDocuments.map((doc) => (
-                <TableRow 
-                  key={doc.id} 
-                  document={doc}
-                  highlightTerm={localFilter}
-                  onPreview={handlePreview}
-                  onDownload={handleDownload}
-                />
-              ))}
-            </tbody>
-          </table>
+          <div className="min-w-full inline-block align-middle">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[800px]">
+                <TableHeader />
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredDocuments.map((doc) => (
+                    <TableRow 
+                      key={doc.id} 
+                      document={doc}
+                      highlightTerm={localFilter}
+                      onPreview={handlePreview}
+                      onDownload={handleDownload}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-center p-8">
             <Search className="h-12 w-12 text-gray-300 mb-4" />
@@ -132,13 +133,15 @@ export default function ResultsTable({ onNewSearch }: ResultsTableProps) {
 
       {/* Paginação */}
       {totalPages > 1 && !localFilter && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalDocuments}
-          pageSize={pageSize}
-          onPageChange={handlePageChange}
-        />
+        <div className="shrink-0">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalDocuments}
+            pageSize={pageSize}
+            onPageChange={handlePageChange}
+          />
+        </div>
       )}
     </div>
   );
