@@ -6,6 +6,7 @@ import SearchCommand from '@/components/search/SearchCommand';
 import ResultsTable from '@/components/results/ResultsTable';
 import Sidebar from '@/components/sidebar/Sidebar';
 import EmptyState from '@/components/EmptyState';
+import { Spinner } from '@/components/ui/spinner';
 
 export default function SearchPage() {
   const { 
@@ -62,9 +63,9 @@ export default function SearchPage() {
       <main>
         {isSearching && (
           <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Buscando documentos...</p>
+            <div className="text-center flex items-center">
+              <Spinner/>
+              <p className="text-gray-600 ml-2">Buscando documentos...</p>
             </div>
           </div>
         )}
